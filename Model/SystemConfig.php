@@ -57,12 +57,7 @@ class SystemConfig extends \Weline\Framework\Database\Model
     public function getConfig(string $key, string $module, string $area): mixed
     {
         $cache_key = 'system_config_cache_' . $key . '_' . $area . '_' . $module;
-
-        if ($cache_data = $this->_cache->get($cache_key)) {
-            return $cache_data;
-        }
-
-        $config_value = $this->where([['key', $key], ['area', $area], ['module', $module]])->find()->fetch();
+        $config_value = $this->clear()->reset()->where([['key', $key], ['area', $area], ['module', $module]])->find()->fetch();
         $result       = null;
         if (isset($config_value['v'])) {
             $result = $config_value['v'];
