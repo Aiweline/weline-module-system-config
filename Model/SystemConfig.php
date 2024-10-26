@@ -107,7 +107,6 @@ class SystemConfig extends \Weline\Framework\Database\Model
     public function setup(ModelSetup $setup, Context $context): void
     {
 //        $setup->dropTable();
-        d('开始安装系统配置模块');
         $this->install($setup, $context);
     }
 
