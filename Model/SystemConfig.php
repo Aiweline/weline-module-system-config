@@ -57,12 +57,11 @@ class SystemConfig extends \Weline\Framework\Database\Model
     public function getConfig(string $key, string $module, string $area): mixed
     {
         $cache_key = 'system_config_cache_' . $key . '_' . $area . '_' . $module;
-
-        if ($cache_data = $this->_cache->get($cache_key)) {
-            return $cache_data;
+        $result    = $this->_cache->get($cache_key);
+        if ($result) {
+            return $result;
         }
-
-        $config_value = $this->where([['key', $key], ['area', $area], ['module', $module]])->find()->fetch();
+        $config_value = $this->clear()->reset()->where([['key', $key], ['area', $area], ['module', $module]])->find()->fetch();
         $result       = null;
         if (isset($config_value['v'])) {
             $result = $config_value['v'];
@@ -92,8 +91,8 @@ class SystemConfig extends \Weline\Framework\Database\Model
         $cache_key = 'system_config_cache_' . $key . '_' . $area . '_' . $module;
         try {
             $this->setData(['key' => $key, 'area' => $area, 'module' => $module, 'v' => $value])
-                 ->forceCheck()
-                 ->save();
+                ->forceCheck()
+                ->save();
             # 设置配置缓存
             $this->_cache->set($cache_key, $value,);
             return true;
@@ -108,6 +107,7 @@ class SystemConfig extends \Weline\Framework\Database\Model
     public function setup(ModelSetup $setup, Context $context): void
     {
 //        $setup->dropTable();
+        d('开始安装系统配置模块');
         $this->install($setup, $context);
     }
 
@@ -126,11 +126,11 @@ class SystemConfig extends \Weline\Framework\Database\Model
         if (!$setup->tableExist()) {
             $setup->getPrinting()->printing('安装', $setup->getTable());
             $setup->createTable('系统配置表')
-                  ->addColumn(self::fields_KEY, TableInterface::column_type_VARCHAR, 120, 'primary key', '键')
-                  ->addColumn(self::fields_VALUE, TableInterface::column_type_TEXT, 0, '', '值')
-                  ->addColumn(self::fields_MODULE, TableInterface::column_type_VARCHAR, 120, 'not null', '模块')
-                  ->addColumn(self::fields_AREA, TableInterface::column_type_VARCHAR, 120, "NOT NULL DEFAULT 'frontend'", '区域：backend/frontend')
-                  ->create();
+                ->addColumn(self::fields_KEY, TableInterface::column_type_VARCHAR, 120, 'primary key', '键')
+                ->addColumn(self::fields_VALUE, TableInterface::column_type_TEXT, 0, '', '值')
+                ->addColumn(self::fields_MODULE, TableInterface::column_type_VARCHAR, 120, 'not null', '模块')
+                ->addColumn(self::fields_AREA, TableInterface::column_type_VARCHAR, 120, "NOT NULL DEFAULT 'frontend'", '区域：backend/frontend')
+                ->create();
         }
     }
 }
